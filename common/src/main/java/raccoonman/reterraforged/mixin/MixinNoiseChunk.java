@@ -1,5 +1,9 @@
 package raccoonman.reterraforged.mixin;
 
+import net.fabricmc.loader.impl.util.log.Log;
+import net.fabricmc.loader.impl.util.log.LogCategory;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.levelgen.*;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -12,20 +16,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.levelgen.Aquifer;
-import net.minecraft.world.level.levelgen.DensityFunction;
-import net.minecraft.world.level.levelgen.DensityFunctions;
-import net.minecraft.world.level.levelgen.NoiseChunk;
-import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
-import net.minecraft.world.level.levelgen.NoiseRouter;
-import net.minecraft.world.level.levelgen.NoiseSettings;
-import net.minecraft.world.level.levelgen.RandomState;
 import raccoonman.reterraforged.data.worldgen.preset.settings.Preset;
 import raccoonman.reterraforged.world.worldgen.GeneratorContext;
 import raccoonman.reterraforged.world.worldgen.RTFRandomState;
 import raccoonman.reterraforged.world.worldgen.densityfunction.CellSampler;
 import raccoonman.reterraforged.world.worldgen.densityfunction.ConditionalFlatCache;
 import raccoonman.reterraforged.world.worldgen.densityfunction.tile.Tile;
+import raccoonman.reterraforged.world.worldgen.rivergen.math.graph.WeightedGraph;
+import raccoonman.reterraforged.world.worldgen.rivergen.terrain.TerrainUtils;
+import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.GeoLayer;
 
 @Mixin(NoiseChunk.class)
 class MixinNoiseChunk {
@@ -58,6 +57,23 @@ class MixinNoiseChunk {
 		GeneratorContext generatorContext;
 		if((Object) randomState instanceof RTFRandomState rtfRandomState && cellCountXZ > 1 && (generatorContext = rtfRandomState.generatorContext()) != null) {
 			this.chunk = generatorContext.cache.provideAtChunk(this.chunkX, this.chunkZ).getChunkReader(this.chunkX, this.chunkZ);
+			// Get raw heightmap data and add it to Context layer, then construct chunk-limited connection graph
+			ChunkPos chunkPos = new ChunkPos(this.chunkX, this.chunkZ);
+			if (!generatorContext.geoLayerManager.getLayer(GeoLayer.Types.ELEVATION).exists(chunkPos)) {
+				//TODO: Move deserializeHeightmap to appropriate location
+				long[][] chunkHeightmap = null;
+
+				for (int x = 0; x<16;x++) {
+					for (int y = 0; y < 16; y++) {
+						chunkHeightmap = TerrainUtils.deserializeCellBacking(generatorContext.cache.provideAtChunk(this.chunkX, this.chunkZ).getBacking());
+					}
+				}
+
+				generatorContext.geoLayerManager.getLayer(GeoLayer.Types.ELEVATION).addChunk(chunkPos, chunkHeightmap);
+				Log.debug(LogCategory.LOG, "ingested chunk heightmap");
+				WeightedGraph chunkGraph = new WeightedGraph(chunkHeightmap, chunkPos);
+				generatorContext.geoLayerManager.getLayer(GeoLayer.Types.ELEVATION).addChunk(chunkPos, chunkGraph);
+			}
 		}
 		this.cache2d = new CellSampler.Cache2d();
 		return randomState.router();

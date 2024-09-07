@@ -5,6 +5,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.Vec2;
 import raccoonman.reterraforged.world.worldgen.rivergen.terrain.TerrainUtils;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public abstract class GeoLayer {
@@ -17,7 +18,7 @@ public abstract class GeoLayer {
 
     // Constructor to initialize layerObject
     public GeoLayer() {
-
+        layerChunks = new HashMap<ChunkPos, Object>();
     }
 
     public Object getOrComputeChunk(ChunkPos chunkPos) {

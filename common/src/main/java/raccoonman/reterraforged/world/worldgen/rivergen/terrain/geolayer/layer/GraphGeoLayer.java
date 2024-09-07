@@ -6,47 +6,33 @@ import net.minecraft.world.phys.Vec2;
 import raccoonman.reterraforged.world.worldgen.rivergen.math.graph.WeightedGraph;
 import raccoonman.reterraforged.world.worldgen.rivergen.terrain.TerrainUtils;
 import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.GeoLayer;
-import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.chunkmap.GraphChunkMap;
+import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.chunkmap.GeoChunkGraph;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 public class GraphGeoLayer extends GeoLayer {
 
-    private final Map<ChunkPos, GraphChunkMap> layerChunks;
+    private final Map<ChunkPos, GeoChunkGraph> layerChunks;
 
     public GraphGeoLayer() {
-        layerChunks = new HashMap<ChunkPos, GraphChunkMap>();
+        layerChunks = new HashMap<ChunkPos, GeoChunkGraph>();
     }
 
-    public GraphChunkMap getOrComputeChunk(ChunkPos chunkPos) {
+    public GeoChunkGraph getOrComputeChunk(ChunkPos chunkPos) {
         //TODO: Implement actual compute
         return layerChunks.get(chunkPos);
     }
 
     public void addChunk(ChunkPos chunkPos, WeightedGraph graphData) {
-        layerChunks.get(chunkPos).add(graphData, chunkPos);
+        layerChunks.put(chunkPos, new GeoChunkGraph(chunkPos, graphData));
     }
 
     public void delChunk(ChunkPos chunkPos) {
-        layerChunks.get(chunkPos).remove(chunkPos);
+        layerChunks.remove(chunkPos);
     }
 
     public boolean exists(ChunkPos chunkPos) {
         return layerChunks.containsKey(chunkPos);
-    }
-
-    public Object getValueAbsolute(Vec2 coord) {
-
-        Tuple<ChunkPos, Vec2> pos = TerrainUtils.getPosRelative(coord);
-        ChunkPos cPos = pos.getA();
-        Vec2 bPos = pos.getB();
-
-        GraphChunkMap item = getOrComputeChunk(cPos);
-        WeightedGraph graph = item.get(cPos);
-        double nodeWeight = graph.getNode(bPos).getWeight();
-
-        return 1;
     }
 }

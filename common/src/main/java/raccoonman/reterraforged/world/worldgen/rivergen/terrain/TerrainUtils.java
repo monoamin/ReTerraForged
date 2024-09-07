@@ -292,7 +292,7 @@ public class TerrainUtils {
 
     public static long[][] deserializeCellBacking(Cell[] backing) {
         if (backing.length != 256) {
-            throw new IllegalArgumentException("Array length must be 256 for a 16x16 matrix.");
+            throw new IllegalArgumentException("Array length must be 256 for a 16x16 matrix. Array is " + backing.length + " long!");
         }
 
         long[][] matrix = new long[16][16];

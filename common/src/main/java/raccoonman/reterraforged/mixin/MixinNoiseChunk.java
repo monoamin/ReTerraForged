@@ -19,12 +19,15 @@ import net.minecraft.world.level.block.Blocks;
 import raccoonman.reterraforged.data.worldgen.preset.settings.Preset;
 import raccoonman.reterraforged.world.worldgen.GeneratorContext;
 import raccoonman.reterraforged.world.worldgen.RTFRandomState;
+import raccoonman.reterraforged.world.worldgen.cell.Cell;
 import raccoonman.reterraforged.world.worldgen.densityfunction.CellSampler;
 import raccoonman.reterraforged.world.worldgen.densityfunction.ConditionalFlatCache;
 import raccoonman.reterraforged.world.worldgen.densityfunction.tile.Tile;
 import raccoonman.reterraforged.world.worldgen.rivergen.math.graph.WeightedGraph;
 import raccoonman.reterraforged.world.worldgen.rivergen.terrain.TerrainUtils;
 import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.GeoLayer;
+import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.ElevationGeoLayer;
+import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.GraphGeoLayer;
 
 @Mixin(NoiseChunk.class)
 class MixinNoiseChunk {
@@ -61,18 +64,21 @@ class MixinNoiseChunk {
 			ChunkPos chunkPos = new ChunkPos(this.chunkX, this.chunkZ);
 			if (!generatorContext.geoLayerManager.getLayer(GeoLayer.Types.ELEVATION).exists(chunkPos)) {
 				//TODO: Move deserializeHeightmap to appropriate location
-				long[][] chunkHeightmap = null;
+				long[][] chunkHeightmap = new long[16][16];
 
 				for (int x = 0; x<16;x++) {
-					for (int y = 0; y < 16; y++) {
-						chunkHeightmap = TerrainUtils.deserializeCellBacking(generatorContext.cache.provideAtChunk(this.chunkX, this.chunkZ).getBacking());
+					for (int z = 0; z < 16; z++) {
+						Tile thisTile = generatorContext.cache.provideAtChunk(this.chunkX, this.chunkZ);
+						Cell thisCell = thisTile.lookup(x,z);
+						chunkHeightmap[x][z] = Math.round(thisCell.height*320);
 					}
 				}
 
-				generatorContext.geoLayerManager.getLayer(GeoLayer.Types.ELEVATION).addChunk(chunkPos, chunkHeightmap);
-				Log.debug(LogCategory.LOG, "ingested chunk heightmap");
+				ElevationGeoLayer thisElevationGeoLayer = (ElevationGeoLayer) generatorContext.geoLayerManager.getLayer(GeoLayer.Types.ELEVATION);
+				thisElevationGeoLayer.addChunk(chunkPos, chunkHeightmap);
 				WeightedGraph chunkGraph = new WeightedGraph(chunkHeightmap, chunkPos);
-				generatorContext.geoLayerManager.getLayer(GeoLayer.Types.ELEVATION).addChunk(chunkPos, chunkGraph);
+				GraphGeoLayer thisGraphGeoLayer = (GraphGeoLayer) generatorContext.geoLayerManager.getLayer(GeoLayer.Types.CONNECTION_GRAPH);
+				thisGraphGeoLayer.addChunk(chunkPos, chunkGraph);
 			}
 		}
 		this.cache2d = new CellSampler.Cache2d();

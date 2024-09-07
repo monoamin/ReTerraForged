@@ -1,6 +1,7 @@
 package raccoonman.reterraforged.world.worldgen.rivergen.math.graph;
 
 import net.minecraft.world.phys.Vec2;
+import raccoonman.reterraforged.world.worldgen.rivergen.math.PPos;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -8,17 +9,17 @@ import java.util.stream.Collectors;
 import static raccoonman.reterraforged.world.worldgen.rivergen.terrain.TerrainUtils.*;
 
 public class WeightedGraphNode {
-    private Vec2 position;
+    private PPos position;
     private double weight;
     private Set<WeightedGraphEdge> edges;
 
-    public WeightedGraphNode(Vec2 position, double weight) {
+    public WeightedGraphNode(PPos position, double weight) {
         this.position = position;
         this.weight = weight;
         this.edges = new HashSet<>();
     }
 
-    public Vec2 getPosition() {
+    public PPos getPosition() {
         return position;
     }
 
@@ -34,8 +35,8 @@ public class WeightedGraphNode {
         this.edges.add(new WeightedGraphEdge(targetNode, edgeWeight));
     }
 
-    public void removeEdge(Vec2 targetPosition) {
-        this.edges.remove(targetPosition);
+    public void removeEdge(WeightedGraphNode target) {
+        edges.removeIf(s -> s.getTarget().equals(target));
     }
 
     public boolean hasEdges() {

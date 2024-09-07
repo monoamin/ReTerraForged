@@ -2,17 +2,17 @@ package raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer;
 
 import net.minecraft.world.level.ChunkPos;
 import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.GeoLayer;
-import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.chunkmap.ElevationChunkMap;
+import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.chunkmap.GeoChunkElevation;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class ElevationGeoLayer extends GeoLayer {
 
-    private final Map<ChunkPos, ElevationChunkMap> layerChunks;
+    private final Map<ChunkPos, GeoChunkElevation> layerChunks;
 
     public ElevationGeoLayer() {
-        layerChunks = new HashMap<>();
+        layerChunks = new HashMap<ChunkPos, GeoChunkElevation>();
     }
 
     // TODO: Fix
@@ -21,8 +21,8 @@ public class ElevationGeoLayer extends GeoLayer {
     }
 
     // TODO: Fix
-    public void addChunk(ChunkPos chunkPos, int[][] heightData) {
-
+    public void addChunk(ChunkPos chunkPos, long[][] heightData) {
+        layerChunks.put(chunkPos, new GeoChunkElevation(chunkPos, heightData));
     }
 
     public void delChunk(ChunkPos chunkPos) {

@@ -1,25 +1,24 @@
 package raccoonman.reterraforged.world.worldgen.rivergen.math.graph;
 
 import net.minecraft.world.phys.Vec2;
-import raccoonman.reterraforged.world.worldgen.rivergen.math.PPos;
+import raccoonman.reterraforged.world.worldgen.rivergen.math.Int2D;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static raccoonman.reterraforged.world.worldgen.rivergen.terrain.TerrainUtils.*;
 
-public class WeightedGraphNode {
-    private PPos position;
+public class GraphNode {
+    private Int2D position;
     private double weight;
-    private Set<WeightedGraphEdge> edges;
+    private Set<GraphEdge> edges;
 
-    public WeightedGraphNode(PPos position, double weight) {
+    public GraphNode(Int2D position, double weight) {
         this.position = position;
         this.weight = weight;
         this.edges = new HashSet<>();
     }
 
-    public PPos getPosition() {
+    public Int2D getPosition() {
         return position;
     }
 
@@ -27,15 +26,15 @@ public class WeightedGraphNode {
         return weight;
     }
 
-    public Set<WeightedGraphEdge> getEdges() {
+    public Set<GraphEdge> getEdges() {
         return edges;
     }
 
-    public void addEdge(WeightedGraphNode targetNode, double edgeWeight) {
-        this.edges.add(new WeightedGraphEdge(targetNode, edgeWeight));
+    public void addEdge(GraphNode targetNode, double edgeWeight) {
+        this.edges.add(new GraphEdge(targetNode, edgeWeight));
     }
 
-    public void removeEdge(WeightedGraphNode target) {
+    public void removeEdge(GraphNode target) {
         edges.removeIf(s -> s.getTarget().equals(target));
     }
 
@@ -43,20 +42,9 @@ public class WeightedGraphNode {
         return !edges.isEmpty();
     }
 
-    public static Collection<WeightedGraphNode> getLowestVonNeumannNeighbors(WeightedGraphNode from, List<WeightedGraphNode> neighborHood) {
-        // VonNeumann neighborhood includes 4 directions: north, south, east, west
-        // Order of heights in the array:
-        // [ypx, ynx, ypz, ynz]
-
-        Vec2[] directions = {
-                POS_X,        // East
-                NEG_X,    // West
-                POS_Z,        // North
-                NEG_Z     // South
-        };
-
+    public static Collection<GraphNode> getLowestNeighbors(GraphNode from, List<GraphNode> neighborHood) {
         int lowest = Integer.MAX_VALUE;
-        List<WeightedGraphNode> lowestNeighbors = new ArrayList<>();
+        List<GraphNode> lowestNeighbors = new ArrayList<>();
 
         // Find the lowest height value among neighbors
         for (int i = 0; i < 4; i++) {

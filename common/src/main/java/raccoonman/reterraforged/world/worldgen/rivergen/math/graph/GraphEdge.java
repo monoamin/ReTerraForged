@@ -1,17 +1,15 @@
 package raccoonman.reterraforged.world.worldgen.rivergen.math.graph;
 
-import net.minecraft.world.phys.Vec2;
-
-public class WeightedGraphEdge {
-    private WeightedGraphNode target;
+public class GraphEdge {
+    private GraphNode target;
     private double weight;
 
-    public WeightedGraphEdge(WeightedGraphNode targetNode, double weight) {
+    public GraphEdge(GraphNode targetNode, double weight) {
         this.target = targetNode;
         this.weight = weight;
     }
 
-    public WeightedGraphNode getTarget() {
+    public GraphNode getTarget() {
         return target;
     }
 

@@ -3,10 +3,10 @@ package raccoonman.reterraforged.world.worldgen.rivergen.math;
 
 import java.util.Objects;
 
-public class PPos {
+public class Int2D {
     private long pos;
 
-    public PPos(int x, int z){
+    public Int2D(int x, int z){
         this.pos=pack(x,z);
     }
 
@@ -25,19 +25,19 @@ public class PPos {
         return (int) pos;
     }
 
-    public PPos add(int x, int z){
-        return new PPos(this.getX()+x,this.getZ()+z);
+    public Int2D add(int x, int z){
+        return new Int2D(this.getX()+x,this.getZ()+z);
     }
 
-    public PPos mul(int x, int z){
-        return new PPos(this.getX()*x,this.getZ()*z);
+    public Int2D mul(int x, int z){
+        return new Int2D(this.getX()*x,this.getZ()*z);
     }
 
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true; // Check if they are the same object
         if (obj == null || getClass() != obj.getClass()) return false; // Null or different class check
-        return this.pos == ((PPos) obj).pos;
+        return this.pos == ((Int2D) obj).pos;
     }
 
     @Override

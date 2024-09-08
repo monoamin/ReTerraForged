@@ -57,29 +57,26 @@ class MixinNoiseChunk {
 		this.randomState = randomState1;
 		this.chunkX = SectionPos.blockToSectionCoord(minBlockX);
 		this.chunkZ = SectionPos.blockToSectionCoord(minBlockZ);
+		ChunkPos chunkPos = new ChunkPos(this.chunkX, this.chunkZ);
 		GeneratorContext generatorContext;
 		if((Object) randomState instanceof RTFRandomState rtfRandomState && cellCountXZ > 1 && (generatorContext = rtfRandomState.generatorContext()) != null) {
 			this.chunk = generatorContext.cache.provideAtChunk(this.chunkX, this.chunkZ).getChunkReader(this.chunkX, this.chunkZ);
+
+
+			//TODO:
+			/* Intercept the Tile.Chunk
+			 */
 			// Get raw heightmap data and add it to Context layer, then construct chunk-limited connection graph
-			ChunkPos chunkPos = new ChunkPos(this.chunkX, this.chunkZ);
 			if (!generatorContext.geoLayerManager.getLayer(GeoLayer.Types.ELEVATION).exists(chunkPos)) {
-				//TODO: Move deserializeHeightmap to appropriate location
-				long[][] chunkHeightmap = new long[16][16];
-
-				for (int x = 0; x<16;x++) {
-					for (int z = 0; z < 16; z++) {
-						Tile thisTile = generatorContext.cache.provideAtChunk(this.chunkX, this.chunkZ);
-						Cell thisCell = thisTile.lookup(x,z);
-						chunkHeightmap[x][z] = Math.round(thisCell.height*320);
-					}
-				}
-
 				ElevationGeoLayer thisElevationGeoLayer = (ElevationGeoLayer) generatorContext.geoLayerManager.getLayer(GeoLayer.Types.ELEVATION);
-				thisElevationGeoLayer.addChunk(chunkPos, chunkHeightmap);
-				WeightedGraph chunkGraph = new WeightedGraph(chunkHeightmap, chunkPos);
 				GraphGeoLayer thisGraphGeoLayer = (GraphGeoLayer) generatorContext.geoLayerManager.getLayer(GeoLayer.Types.CONNECTION_GRAPH);
-				thisGraphGeoLayer.addChunk(chunkPos, chunkGraph);
+
+				thisElevationGeoLayer.getOrComputeChunk(chunkPos, generatorContext);
+				thisGraphGeoLayer.getOrComputeChunk(chunkPos, generatorContext);
 			}
+
+
+
 		}
 		this.cache2d = new CellSampler.Cache2d();
 		return randomState.router();

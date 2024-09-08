@@ -2,15 +2,17 @@ package raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.
 
 import net.minecraft.world.level.ChunkPos;
 
-import java.util.HashMap;
-import java.util.Map;
-
-public class GeoChunkElevation {
+public class ElevationGeoChunk {
     private  long[][] map;
     private ChunkPos chunkPos;
-    public GeoChunkElevation(ChunkPos chunkPos, long[][] heights)
+    public ElevationGeoChunk(ChunkPos chunkPos, long[][] heights)
     {
         this.chunkPos = chunkPos;
         this.map = heights;
+    }
+
+    public long[][] get()
+    {
+        return map;
     }
 }

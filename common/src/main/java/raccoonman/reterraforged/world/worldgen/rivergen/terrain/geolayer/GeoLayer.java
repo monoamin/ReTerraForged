@@ -3,6 +3,7 @@ package raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.Vec2;
+import raccoonman.reterraforged.world.worldgen.GeneratorContext;
 import raccoonman.reterraforged.world.worldgen.rivergen.terrain.TerrainUtils;
 
 import java.util.HashMap;
@@ -11,7 +12,10 @@ import java.util.Map;
 public abstract class GeoLayer {
     public enum Types {
         ELEVATION,
-        CONNECTION_GRAPH
+        CONNECTION_GRAPH,
+        FLOW_GRAPH,
+        RIVER_SPLINE,
+        RIVER_MASK
     }
 
     private Map<ChunkPos, Object> layerChunks;
@@ -21,7 +25,7 @@ public abstract class GeoLayer {
         layerChunks = new HashMap<ChunkPos, Object>();
     }
 
-    public Object getOrComputeChunk(ChunkPos chunkPos) {
+    public Object getOrComputeChunk(ChunkPos chunkPos, GeneratorContext context) {
         return layerChunks.get(chunkPos);
     }
 

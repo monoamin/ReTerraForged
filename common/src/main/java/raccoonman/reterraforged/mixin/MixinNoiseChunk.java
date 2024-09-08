@@ -1,7 +1,5 @@
 package raccoonman.reterraforged.mixin;
 
-import net.fabricmc.loader.impl.util.log.Log;
-import net.fabricmc.loader.impl.util.log.LogCategory;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.levelgen.*;
 import org.jetbrains.annotations.Nullable;
@@ -19,13 +17,10 @@ import net.minecraft.world.level.block.Blocks;
 import raccoonman.reterraforged.data.worldgen.preset.settings.Preset;
 import raccoonman.reterraforged.world.worldgen.GeneratorContext;
 import raccoonman.reterraforged.world.worldgen.RTFRandomState;
-import raccoonman.reterraforged.world.worldgen.cell.Cell;
 import raccoonman.reterraforged.world.worldgen.densityfunction.CellSampler;
 import raccoonman.reterraforged.world.worldgen.densityfunction.ConditionalFlatCache;
 import raccoonman.reterraforged.world.worldgen.densityfunction.tile.Tile;
-import raccoonman.reterraforged.world.worldgen.rivergen.math.graph.WeightedGraph;
-import raccoonman.reterraforged.world.worldgen.rivergen.terrain.TerrainUtils;
-import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.GeoLayer;
+import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.AbstractGeoLayer;
 import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.ElevationGeoLayer;
 import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.GraphGeoLayer;
 
@@ -67,11 +62,11 @@ class MixinNoiseChunk {
 			/* Intercept the Tile.Chunk
 			 */
 			// Get raw heightmap data and add it to Context layer, then construct chunk-limited connection graph
-			if (!generatorContext.geoLayerManager.getLayer(GeoLayer.Types.ELEVATION).exists(chunkPos)) {
-				ElevationGeoLayer thisElevationGeoLayer = (ElevationGeoLayer) generatorContext.geoLayerManager.getLayer(GeoLayer.Types.ELEVATION);
-				GraphGeoLayer thisGraphGeoLayer = (GraphGeoLayer) generatorContext.geoLayerManager.getLayer(GeoLayer.Types.CONNECTION_GRAPH);
+			if (!generatorContext.geoLayerManager.getLayer(AbstractGeoLayer.Types.ELEVATION).exists(chunkPos)) {
+				//ElevationGeoLayer thisElevationGeoLayer = (ElevationGeoLayer) generatorContext.geoLayerManager.getLayer(AbstractGeoLayer.Types.ELEVATION);
+				GraphGeoLayer thisGraphGeoLayer = (GraphGeoLayer) generatorContext.geoLayerManager.getLayer(AbstractGeoLayer.Types.CHUNK_GRAPH);
 
-				thisElevationGeoLayer.getOrComputeChunk(chunkPos, generatorContext);
+				//thisElevationGeoLayer.getOrComputeChunk(chunkPos, generatorContext);
 				thisGraphGeoLayer.getOrComputeChunk(chunkPos, generatorContext);
 			}
 

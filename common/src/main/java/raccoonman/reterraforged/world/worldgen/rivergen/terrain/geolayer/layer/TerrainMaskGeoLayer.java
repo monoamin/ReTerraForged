@@ -2,17 +2,17 @@ package raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer;
 
 import net.minecraft.world.level.ChunkPos;
 import raccoonman.reterraforged.world.worldgen.rivergen.math.graph.WeightedGraph;
-import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.GeoLayer;
 import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.chunkmap.GraphGeoChunk;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class TerrainMaskGeoLayer extends GeoLayer {
+public class TerrainMaskGeoLayer extends AbstractGeoLayer {
 
     private final Map<ChunkPos, GraphGeoChunk> layerChunks;
 
     public TerrainMaskGeoLayer() {
+        super();
         layerChunks = new HashMap<ChunkPos, GraphGeoChunk>();
     }
 

@@ -1,20 +1,23 @@
 package raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer;
 
+import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.AbstractGeoLayer;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class GeoLayerManager {
-    Map<GeoLayer.Types, GeoLayer> contextLayers; // Now strictly GeoLayer
+    Map<AbstractGeoLayer.Types, AbstractGeoLayer> contextLayers; // Now strictly GeoLayer
 
     public GeoLayerManager(){
         contextLayers = new HashMap<>();
     }
 
-    public void addLayerIfAbsent(GeoLayer.Types type, GeoLayer layer){
-        if (!contextLayers.containsKey(type)) contextLayers.put(type, layer);
+    public AbstractGeoLayer addLayerIfAbsent(AbstractGeoLayer.Types type, AbstractGeoLayer layer){
+        if (!contextLayers.containsKey(type)) return contextLayers.put(type, layer);
+        else { return null;}
     }
 
-    public GeoLayer getLayer(GeoLayer.Types type){
+    public AbstractGeoLayer getLayer(AbstractGeoLayer.Types type){
         return contextLayers.get(type); // No cast needed
     }
 }

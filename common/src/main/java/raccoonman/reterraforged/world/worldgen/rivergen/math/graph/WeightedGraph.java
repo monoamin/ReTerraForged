@@ -1,5 +1,6 @@
 package raccoonman.reterraforged.world.worldgen.rivergen.math.graph;
 import net.minecraft.world.level.ChunkPos;
+import org.apache.logging.log4j.core.appender.rolling.action.IfAll;
 import raccoonman.reterraforged.world.worldgen.rivergen.math.Int2D;
 
 import java.util.*;
@@ -16,6 +17,10 @@ public class WeightedGraph {
         }
 
         calculateEdges();
+    }
+
+    public WeightedGraph() {
+
     }
 
     // Adds a node to the graph
@@ -119,6 +124,61 @@ public class WeightedGraph {
                     if (yDiff > 0) addDirectedEdge(sourceNode, lowerNeighbor, yDiff);
                 }
             }
+        }
+    }
+
+    public WeightedGraph getSubGraph(Int2D elevationMax) {
+        WeightedGraph prunedGraph = new WeightedGraph(); // Initialize pruned graph
+        GraphNode startNode = this.nodes.get(elevationMax); // Retrieve starting node based on elevationMax
+        Set<GraphNode> visitedNodes = new HashSet<>(); // Set of visited nodes to avoid cycles
+
+        // Priority queue for selecting paths based on steepest cumulative descent
+        PriorityQueue<PathNode> pq = new PriorityQueue<>((a, b) -> Long.compare(b.cumulativeDescent, a.cumulativeDescent));
+        // Start from the maximum elevation node
+        pq.add(new PathNode(startNode, 0)); // Start with zero cumulative descent
+
+        while (!pq.isEmpty()) {
+            PathNode pathNode = pq.poll();
+            GraphNode currentNode = pathNode.node;
+
+            // Avoid reprocessing nodes
+            if (visitedNodes.contains(currentNode)) continue;
+            visitedNodes.add(currentNode);
+
+            // Add current node to pruned graph
+            prunedGraph.addNode(currentNode.getPosition(),1);
+
+            Set<GraphEdge> edges = currentNode.getEdges();
+
+            for (GraphEdge edge : edges) {
+                GraphNode targetNode = edge.getTarget();
+
+                long heightDifference = (long) (currentNode.getWeight() - targetNode.getWeight());
+
+                // We're only interested in descending paths
+                if (heightDifference > 0) {
+                    long newCumulativeDescent = pathNode.cumulativeDescent + heightDifference;
+
+                    // Add this path with updated cumulative descent
+                    pq.add(new PathNode(targetNode, newCumulativeDescent));
+
+                    // Add the edge to the pruned graph if it's part of the steepest descent path
+                    prunedGraph.addDirectedEdge(currentNode, targetNode, heightDifference);
+                }
+            }
+        }
+
+        return prunedGraph;
+    }
+
+    // Helper class to store path information
+    class PathNode {
+        GraphNode node;
+        long cumulativeDescent;
+
+        public PathNode(GraphNode node, long cumulativeDescent) {
+            this.node = node;
+            this.cumulativeDescent = cumulativeDescent;
         }
     }
 

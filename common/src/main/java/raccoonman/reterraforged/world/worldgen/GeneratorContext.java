@@ -10,7 +10,7 @@ import raccoonman.reterraforged.world.worldgen.cell.heightmap.WorldLookup;
 import raccoonman.reterraforged.world.worldgen.densityfunction.tile.TileCache;
 import raccoonman.reterraforged.world.worldgen.densityfunction.tile.generation.TileGenerator;
 import raccoonman.reterraforged.world.worldgen.noise.module.Noise;
-import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.GeoLayer;
+import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.AbstractGeoLayer;
 import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.GeoLayerManager;
 import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.ElevationGeoLayer;
 import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.GraphGeoLayer;
@@ -36,10 +36,13 @@ public class GeneratorContext {
         this.cache = cache;
         this.lookup = new WorldLookup(this);
         this.geoLayerManager = new GeoLayerManager();
-        // Initialize our context layers
-        this.geoLayerManager.addLayerIfAbsent(GeoLayer.Types.ELEVATION, new ElevationGeoLayer());
-        this.geoLayerManager.addLayerIfAbsent(GeoLayer.Types.CONNECTION_GRAPH, new GraphGeoLayer());
 
+        // Initialize GeoLayers
+        this.geoLayerManager.addLayerIfAbsent(AbstractGeoLayer.Types.ELEVATION, new ElevationGeoLayer(null));
+        this.geoLayerManager.addLayerIfAbsent(AbstractGeoLayer.Types.CHUNK_GRAPH, new GraphGeoLayer(this.geoLayerManager.getLayer(AbstractGeoLayer.Types.ELEVATION)));
+        this.geoLayerManager.addLayerIfAbsent(AbstractGeoLayer.Types.AREA_GRAPH, new GraphGeoLayer(this.geoLayerManager.getLayer(AbstractGeoLayer.Types.CHUNK_GRAPH)));
+        //this.geoLayerManager.addLayerIfAbsent(GeoLayer.Types.RIVER_SPLINE, new GraphGeoLayer());
+        //this.geoLayerManager.addLayerIfAbsent(GeoLayer.Types.RIVER_MASK, new GraphGeoLayer());
     }
 
     public static GeneratorContext makeCached(Preset preset, HolderGetter<Noise> noiseLookup, int seed, int tileSize, int batchCount, boolean queue) {

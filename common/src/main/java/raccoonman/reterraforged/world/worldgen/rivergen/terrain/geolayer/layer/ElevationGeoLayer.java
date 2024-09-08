@@ -4,27 +4,28 @@ import net.minecraft.world.level.ChunkPos;
 import raccoonman.reterraforged.world.worldgen.GeneratorContext;
 import raccoonman.reterraforged.world.worldgen.cell.Cell;
 import raccoonman.reterraforged.world.worldgen.densityfunction.tile.Tile;
-import raccoonman.reterraforged.world.worldgen.rivergen.math.graph.WeightedGraph;
-import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.GeoLayer;
 import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.chunkmap.ElevationGeoChunk;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class ElevationGeoLayer extends GeoLayer {
+public class ElevationGeoLayer extends AbstractGeoLayer {
 
     private final Map<ChunkPos, ElevationGeoChunk> layerChunks;
+    private AbstractGeoLayer dependencyLayer;
 
-    public ElevationGeoLayer() {
+    public ElevationGeoLayer(AbstractGeoLayer dependencyLayer) {
+        super(dependencyLayer);
         layerChunks = new HashMap<ChunkPos, ElevationGeoChunk>();
+        this.dependencyLayer = dependencyLayer;
     }
 
     public ElevationGeoChunk getOrComputeChunk(ChunkPos chunkPos, GeneratorContext generatorContext) {
-        // TODO: This is super weirdly placed
+        // Populate heightmap from generatorContext
         if (layerChunks.containsKey(chunkPos)) { return layerChunks.get(chunkPos); }
         else {
             Tile tile = generatorContext.cache.provideAtChunk(chunkPos.x, chunkPos.z);
-            if (!generatorContext.geoLayerManager.getLayer(GeoLayer.Types.ELEVATION).exists(chunkPos)) {
+            if (!generatorContext.geoLayerManager.getLayer(AbstractGeoLayer.Types.ELEVATION).exists(chunkPos)) {
                 long[][] chunkHeightmap = new long[16][16];
 
                 for (int x = 0; x < 16; x++) {
@@ -33,7 +34,7 @@ public class ElevationGeoLayer extends GeoLayer {
                         chunkHeightmap[x][z] = Math.round(thisCell.height * 320);
                     }
                 }
-                return this.addChunk(chunkPos, new ElevationGeoChunk(chunkPos, chunkHeightmap));
+                return this.addChunk(chunkPos, new ElevationGeoChunk(chunkPos, chunkHeightmap, this, generatorContext, null));
             }
         }
         return null;

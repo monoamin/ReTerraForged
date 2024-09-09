@@ -2,6 +2,7 @@ package raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.
 
 import net.minecraft.world.level.ChunkPos;
 import raccoonman.reterraforged.world.worldgen.GeneratorContext;
+import raccoonman.reterraforged.world.worldgen.densityfunction.tile.Tile;
 import raccoonman.reterraforged.world.worldgen.rivergen.math.Int2D;
 import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.ElevationGeoLayer;
 
@@ -34,5 +35,9 @@ public class ElevationGeoChunk extends AbstractGeoChunk {
             }
         }
         return new Int2D(xMax,zMax);
+    }
+
+    public Tile getTileChunk(){
+        return generatorContext.cache.provideAtChunk(super.chunkPos.x,super.chunkPos.z);
     }
 }

@@ -10,8 +10,8 @@ public class SplineNetworkGeoLayer extends AbstractGeoLayer {
 
     private final Map<ChunkPos, GraphNode> layerChunks;
 
-    public SplineNetworkGeoLayer() {
-        super();
+    public SplineNetworkGeoLayer(AbstractGeoLayer dependencyLayer) {
+        super(dependencyLayer);
         layerChunks = new HashMap<ChunkPos, GraphNode>();
     }
 

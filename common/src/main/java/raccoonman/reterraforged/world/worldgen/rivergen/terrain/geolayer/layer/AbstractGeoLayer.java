@@ -10,7 +10,7 @@ import java.util.Map;
 public abstract class AbstractGeoLayer {
     public enum Types {
         ELEVATION,
-        CHUNK_GRAPH,
+        WEIGHTED_GRAPH,
         AREA_GRAPH,
         SPLINE_NET,
         TERRAIN_MASK

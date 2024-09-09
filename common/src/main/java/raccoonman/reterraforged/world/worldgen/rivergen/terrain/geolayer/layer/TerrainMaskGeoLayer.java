@@ -11,8 +11,8 @@ public class TerrainMaskGeoLayer extends AbstractGeoLayer {
 
     private final Map<ChunkPos, GraphGeoChunk> layerChunks;
 
-    public TerrainMaskGeoLayer() {
-        super();
+    public TerrainMaskGeoLayer(AbstractGeoLayer dependencyLayer) {
+        super(dependencyLayer);
         layerChunks = new HashMap<ChunkPos, GraphGeoChunk>();
     }
 

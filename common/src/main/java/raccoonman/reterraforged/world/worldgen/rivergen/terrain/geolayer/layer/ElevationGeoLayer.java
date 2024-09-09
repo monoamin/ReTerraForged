@@ -4,6 +4,8 @@ import net.minecraft.world.level.ChunkPos;
 import raccoonman.reterraforged.world.worldgen.GeneratorContext;
 import raccoonman.reterraforged.world.worldgen.cell.Cell;
 import raccoonman.reterraforged.world.worldgen.densityfunction.tile.Tile;
+import raccoonman.reterraforged.world.worldgen.densityfunction.tile.TileCache;
+import raccoonman.reterraforged.world.worldgen.densityfunction.tile.generation.TileGenerator;
 import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.chunkmap.ElevationGeoChunk;
 
 import java.util.HashMap;
@@ -11,45 +13,27 @@ import java.util.Map;
 
 public class ElevationGeoLayer extends AbstractGeoLayer {
 
-    private final Map<ChunkPos, ElevationGeoChunk> layerChunks;
-    private AbstractGeoLayer dependencyLayer;
+    // This is a GeoLayer with a raw input, so we need some way of accessing Tiles and Cells
+    private TileGenerator tileGenerator;
+    private TileCache tileCache;
 
-    public ElevationGeoLayer(AbstractGeoLayer dependencyLayer) {
-        super(dependencyLayer);
-        layerChunks = new HashMap<ChunkPos, ElevationGeoChunk>();
-        this.dependencyLayer = dependencyLayer;
+    public ElevationGeoLayer(TileGenerator tileGenerator, TileCache tileCache) {
+        super(null); // Initialize super with null because we don't have any dependencies on GeoLayers
+        this.tileGenerator = tileGenerator;
+        //layerChunks = new HashMap<ChunkPos, ElevationGeoChunk>();
     }
 
     public ElevationGeoChunk getOrComputeChunk(ChunkPos chunkPos, GeneratorContext generatorContext) {
         // Populate heightmap from generatorContext
-        if (layerChunks.containsKey(chunkPos)) { return layerChunks.get(chunkPos); }
-        else {
-            Tile tile = generatorContext.cache.provideAtChunk(chunkPos.x, chunkPos.z);
-            if (!generatorContext.geoLayerManager.getLayer(AbstractGeoLayer.Types.ELEVATION).exists(chunkPos)) {
-                long[][] chunkHeightmap = new long[16][16];
-
-                for (int x = 0; x < 16; x++) {
-                    for (int z = 0; z < 16; z++) {
-                        Cell thisCell = tile.lookup(x, z);
-                        chunkHeightmap[x][z] = Math.round(thisCell.height * 320);
-                    }
-                }
-                return this.addChunk(chunkPos, new ElevationGeoChunk(chunkPos, chunkHeightmap, this, generatorContext, null));
+        //TODO: Add an utility method to Tile that returns the long[][]
+        //  Or, simply use Tiles in the GeoLayer itself, which is probably better
+        long[][] heightMap = new long[16][16];
+        for (int x=0; x<16; x++){
+            for (int z=0;z<16;z++){
+                heightMap[x][z]=Math.round(tileCache.provideAtChunk(chunkPos.x,chunkPos.z).getCellRaw(x,z).height*320);
             }
         }
-        return null;
-    }
-
-    public ElevationGeoChunk addChunk(ChunkPos chunkPos, ElevationGeoChunk geoChunk) {
-        layerChunks.put(chunkPos, geoChunk);
-        return geoChunk;
-    }
-
-    public void delChunk(ChunkPos chunkPos) {
-        layerChunks.remove(chunkPos);
-    }
-
-    public boolean exists(ChunkPos chunkPos) {
-        return layerChunks.containsKey(chunkPos);
+        ElevationGeoChunk elevationGeoChunk = new ElevationGeoChunk(chunkPos, heightMap,this, generatorContext,null);
+        return (ElevationGeoChunk) super.addChunk(chunkPos,elevationGeoChunk);
     }
 }

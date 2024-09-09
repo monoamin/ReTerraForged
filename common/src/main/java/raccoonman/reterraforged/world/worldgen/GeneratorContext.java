@@ -35,12 +35,12 @@ public class GeneratorContext {
         this.generator = new TileGenerator(Heightmap.make(this), new WorldFilters(this), tileSize, tileBorder, batchCount);
         this.cache = cache;
         this.lookup = new WorldLookup(this);
-        this.geoLayerManager = new GeoLayerManager();
+        this.geoLayerManager = new GeoLayerManager(this);
 
         // Initialize GeoLayers
-        this.geoLayerManager.addLayerIfAbsent(AbstractGeoLayer.Types.ELEVATION, new ElevationGeoLayer(null));
-        this.geoLayerManager.addLayerIfAbsent(AbstractGeoLayer.Types.CHUNK_GRAPH, new GraphGeoLayer(this.geoLayerManager.getLayer(AbstractGeoLayer.Types.ELEVATION)));
-        this.geoLayerManager.addLayerIfAbsent(AbstractGeoLayer.Types.AREA_GRAPH, new GraphGeoLayer(this.geoLayerManager.getLayer(AbstractGeoLayer.Types.CHUNK_GRAPH)));
+        this.geoLayerManager.addLayerIfAbsent(AbstractGeoLayer.Types.ELEVATION, new ElevationGeoLayer(this.generator, this.cache));
+        //this.geoLayerManager.addLayerIfAbsent(AbstractGeoLayer.Types.WEIGHTED_GRAPH, new GraphGeoLayer(this.geoLayerManager.getLayer(AbstractGeoLayer.Types.ELEVATION)));
+        //this.geoLayerManager.addLayerIfAbsent(AbstractGeoLayer.Types.AREA_GRAPH, new GraphGeoLayer(this.geoLayerManager.getLayer(AbstractGeoLayer.Types.WEIGHTED_GRAPH)));
         //this.geoLayerManager.addLayerIfAbsent(GeoLayer.Types.RIVER_SPLINE, new GraphGeoLayer());
         //this.geoLayerManager.addLayerIfAbsent(GeoLayer.Types.RIVER_MASK, new GraphGeoLayer());
     }

@@ -20,9 +20,8 @@ import raccoonman.reterraforged.world.worldgen.RTFRandomState;
 import raccoonman.reterraforged.world.worldgen.densityfunction.CellSampler;
 import raccoonman.reterraforged.world.worldgen.densityfunction.ConditionalFlatCache;
 import raccoonman.reterraforged.world.worldgen.densityfunction.tile.Tile;
-import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.AbstractGeoLayer;
-import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.ElevationGeoLayer;
-import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.GraphGeoLayer;
+
+import java.util.Random;
 
 @Mixin(NoiseChunk.class)
 class MixinNoiseChunk {
@@ -55,23 +54,8 @@ class MixinNoiseChunk {
 		ChunkPos chunkPos = new ChunkPos(this.chunkX, this.chunkZ);
 		GeneratorContext generatorContext;
 		if((Object) randomState instanceof RTFRandomState rtfRandomState && cellCountXZ > 1 && (generatorContext = rtfRandomState.generatorContext()) != null) {
-			this.chunk = generatorContext.cache.provideAtChunk(this.chunkX, this.chunkZ).getChunkReader(this.chunkX, this.chunkZ);
-
-
-			//TODO:
-			/* Intercept the Tile.Chunk
-			 */
-			// Get raw heightmap data and add it to Context layer, then construct chunk-limited connection graph
-			if (!generatorContext.geoLayerManager.getLayer(AbstractGeoLayer.Types.ELEVATION).exists(chunkPos)) {
-				//ElevationGeoLayer thisElevationGeoLayer = (ElevationGeoLayer) generatorContext.geoLayerManager.getLayer(AbstractGeoLayer.Types.ELEVATION);
-				GraphGeoLayer thisGraphGeoLayer = (GraphGeoLayer) generatorContext.geoLayerManager.getLayer(AbstractGeoLayer.Types.CHUNK_GRAPH);
-
-				//thisElevationGeoLayer.getOrComputeChunk(chunkPos, generatorContext);
-				thisGraphGeoLayer.getOrComputeChunk(chunkPos, generatorContext);
-			}
-
-
-
+			//this.chunk = generatorContext.cache.provideAtChunk(this.chunkX, this.chunkZ).getChunkReader(this.chunkX, this.chunkZ);
+			this.chunk = generatorContext.geoLayerManager.getBaseTileChunk(chunkPos,generatorContext);
 		}
 		this.cache2d = new CellSampler.Cache2d();
 		return randomState.router();

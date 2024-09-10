@@ -24,8 +24,8 @@ public class GraphGeoLayer extends AbstractGeoLayer {
         if ( super.exists(chunkPos) ) {
             return (GraphGeoChunk) super.getOrComputeChunk(chunkPos, context);
         } else {
-            ElevationGeoChunk elevationGeoChunk = elevationGeoLayer.getOrComputeChunk(chunkPos, context);
-            WeightedGraph graph = new WeightedGraph(elevationGeoChunk.getData(), chunkPos);
+            ElevationGeoChunk elevationGeoChunk = null; // (ElevationGeoChunk)elevationGeoLayer.getOrComputeChunk(chunkPos,context);
+            WeightedGraph graph = null; //new WeightedGraph(elevationGeoChunk.getData(), chunkPos);
             return (GraphGeoChunk) super.addChunk(chunkPos, new GraphGeoChunk(chunkPos, this, context, GeoChunkContext.moore(chunkPos), graph));
         }
     }

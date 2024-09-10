@@ -3,41 +3,36 @@ package raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.
 import net.minecraft.world.level.ChunkPos;
 import raccoonman.reterraforged.world.worldgen.GeneratorContext;
 import raccoonman.reterraforged.world.worldgen.densityfunction.tile.Tile;
+import raccoonman.reterraforged.world.worldgen.densityfunction.tile.TileCache;
 import raccoonman.reterraforged.world.worldgen.rivergen.math.Int2D;
 import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.ElevationGeoLayer;
 
 import java.util.List;
 
 public class ElevationGeoChunk extends AbstractGeoChunk {
-    private final long[][] map;
-    private int maxY;
-    public ElevationGeoChunk(ChunkPos chunkPos, long[][] heights, ElevationGeoLayer parentGeoLayer, GeneratorContext context, List<ChunkPos> contextGeoChunks)
+    private TileCache tileCache;
+    public ElevationGeoChunk(ChunkPos chunkPos, ElevationGeoLayer parentGeoLayer, GeneratorContext generatorContext, List<ChunkPos> contextGeoChunks)
     {
-        super(chunkPos,parentGeoLayer,context,contextGeoChunks);
-        this.map = heights;
-    }
-
-    public long[][] getData()
-    {
-        return map;
-    }
-
-    public Int2D getMaxPos(){
-        int max = 0;
-        int xMax = -1, zMax = -1;
-        for (int i = 0; i < map.length; i++) {
-            for (int j = 0; j < map[i].length; j++) {
-                if (map[i][j] > max) {
-                    max = (int)map[i][j];
-                    xMax = i;
-                    zMax = j;
-                }
-            }
-        }
-        return new Int2D(xMax,zMax);
+        super(chunkPos,parentGeoLayer,generatorContext,contextGeoChunks);
+        this.tileCache = generatorContext.cache;
     }
 
     public Tile getTileChunk(){
-        return generatorContext.cache.provideAtChunk(super.chunkPos.x,super.chunkPos.z);
+        return tileCache.provide(chunkPos.x,chunkPos.z);
     }
+
+    /*
+    // Populate heightmap from generatorContext
+        //TODO: Add an utility method to Tile that returns the long[][]
+        //  Or, simply use Tiles in the GeoLayer itself, which is probably better
+
+
+        long[][] heightMap = new long[16][16];
+        for (int x=0; x<16; x++){
+            for (int z=0;z<16;z++){
+                heightMap[x][z]=Math.round(tileCache.provide(chunkPos.x,chunkPos.z).getCellRaw(x,z).height*320);
+            }
+        }
+
+     */
 }

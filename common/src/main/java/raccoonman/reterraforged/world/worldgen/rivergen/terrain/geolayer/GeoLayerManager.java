@@ -27,8 +27,8 @@ public class GeoLayerManager {
         return contextLayers.get(type); // No cast needed
     }
 
-    public Tile.Chunk getBaseTileChunk(ChunkPos chunkPos, GeneratorContext generatorContext) {
+    public Tile getBaseTile(ChunkPos chunkPos) {
         ElevationGeoLayer elevationGeoLayer = (ElevationGeoLayer)getLayer(AbstractGeoLayer.Types.ELEVATION);
-        return elevationGeoLayer.getOrComputeChunk(chunkPos,generatorContext).getTileChunk().getChunkReader(chunkPos.x, chunkPos.z);
+        return (Tile) elevationGeoLayer.getOrComputeChunk(chunkPos, this.generatorContext);
     }
 }

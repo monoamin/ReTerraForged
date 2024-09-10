@@ -9,7 +9,7 @@ import java.util.List;
 public abstract class AbstractGeoChunk
 {
     protected final AbstractGeoLayer parentGeoLayer;
-    protected final GeneratorContext generatorContext;
+    protected GeneratorContext generatorContext;
     protected final List<ChunkPos> contextGeoChunks;
     protected final ChunkPos chunkPos;
 

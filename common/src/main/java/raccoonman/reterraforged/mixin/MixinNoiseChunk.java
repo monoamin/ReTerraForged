@@ -55,7 +55,8 @@ class MixinNoiseChunk {
 		GeneratorContext generatorContext;
 		if((Object) randomState instanceof RTFRandomState rtfRandomState && cellCountXZ > 1 && (generatorContext = rtfRandomState.generatorContext()) != null) {
 			//this.chunk = generatorContext.cache.provideAtChunk(this.chunkX, this.chunkZ).getChunkReader(this.chunkX, this.chunkZ);
-			this.chunk = generatorContext.geoLayerManager.getBaseTileChunk(chunkPos,generatorContext);
+			//TODO: Fix Crash
+			this.chunk = generatorContext.geoLayerManager.getBaseTile(chunkPos).getChunkReader(this.chunkX, this.chunkZ);
 		}
 		this.cache2d = new CellSampler.Cache2d();
 		return randomState.router();

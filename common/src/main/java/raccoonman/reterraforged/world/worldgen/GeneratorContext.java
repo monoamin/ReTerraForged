@@ -35,20 +35,19 @@ public class GeneratorContext {
         this.generator = new TileGenerator(Heightmap.make(this), new WorldFilters(this), tileSize, tileBorder, batchCount);
         this.cache = cache;
         this.lookup = new WorldLookup(this);
-        this.geoLayerManager = new GeoLayerManager(this);
-
-        // Initialize GeoLayers
-        this.geoLayerManager.addLayerIfAbsent(AbstractGeoLayer.Types.ELEVATION, new ElevationGeoLayer(this.generator, this.cache));
-        //this.geoLayerManager.addLayerIfAbsent(AbstractGeoLayer.Types.WEIGHTED_GRAPH, new GraphGeoLayer(this.geoLayerManager.getLayer(AbstractGeoLayer.Types.ELEVATION)));
-        //this.geoLayerManager.addLayerIfAbsent(AbstractGeoLayer.Types.AREA_GRAPH, new GraphGeoLayer(this.geoLayerManager.getLayer(AbstractGeoLayer.Types.WEIGHTED_GRAPH)));
-        //this.geoLayerManager.addLayerIfAbsent(GeoLayer.Types.RIVER_SPLINE, new GraphGeoLayer());
-        //this.geoLayerManager.addLayerIfAbsent(GeoLayer.Types.RIVER_MASK, new GraphGeoLayer());
     }
 
     public static GeneratorContext makeCached(Preset preset, HolderGetter<Noise> noiseLookup, int seed, int tileSize, int batchCount, boolean queue) {
     	GeneratorContext ctx = makeUncached(preset, noiseLookup, seed, tileSize, Math.min(2, Math.max(1, preset.filters().erosion.dropletLifetime / 16)), batchCount);
     	ctx.cache = new TileCache(tileSize, queue, ctx.generator);
     	ctx.lookup = new WorldLookup(ctx);
+        ctx.geoLayerManager = new GeoLayerManager(ctx);
+        //TODO: Move to the GeneratorContext instance that has tile data
+        ctx.geoLayerManager.addLayerIfAbsent(AbstractGeoLayer.Types.ELEVATION, new ElevationGeoLayer(ctx.generator, ctx.cache));
+        //this.geoLayerManager.addLayerIfAbsent(AbstractGeoLayer.Types.WEIGHTED_GRAPH, new GraphGeoLayer(this.geoLayerManager.getLayer(AbstractGeoLayer.Types.ELEVATION)));
+        //this.geoLayerManager.addLayerIfAbsent(AbstractGeoLayer.Types.AREA_GRAPH, new GraphGeoLayer(this.geoLayerManager.getLayer(AbstractGeoLayer.Types.WEIGHTED_GRAPH)));
+        //this.geoLayerManager.addLayerIfAbsent(GeoLayer.Types.RIVER_SPLINE, new GraphGeoLayer());
+        //this.geoLayerManager.addLayerIfAbsent(GeoLayer.Types.RIVER_MASK, new GraphGeoLayer());
     	return ctx;
     }
     

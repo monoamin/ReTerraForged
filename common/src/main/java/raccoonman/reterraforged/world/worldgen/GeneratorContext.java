@@ -10,10 +10,8 @@ import raccoonman.reterraforged.world.worldgen.cell.heightmap.WorldLookup;
 import raccoonman.reterraforged.world.worldgen.densityfunction.tile.TileCache;
 import raccoonman.reterraforged.world.worldgen.densityfunction.tile.generation.TileGenerator;
 import raccoonman.reterraforged.world.worldgen.noise.module.Noise;
-import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.AbstractGeoLayer;
+import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.*;
 import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.GeoLayerManager;
-import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.ElevationGeoLayer;
-import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.GraphGeoLayer;
 import raccoonman.reterraforged.world.worldgen.util.Seed;
 
 public class GeneratorContext {
@@ -44,8 +42,9 @@ public class GeneratorContext {
         ctx.geoLayerManager = new GeoLayerManager(ctx);
         //TODO: Move to the GeneratorContext instance that has tile data
         ctx.geoLayerManager.addLayerIfAbsent(AbstractGeoLayer.Types.ELEVATION, new ElevationGeoLayer(ctx.generator, ctx.cache));
-        //this.geoLayerManager.addLayerIfAbsent(AbstractGeoLayer.Types.WEIGHTED_GRAPH, new GraphGeoLayer(this.geoLayerManager.getLayer(AbstractGeoLayer.Types.ELEVATION)));
-        //this.geoLayerManager.addLayerIfAbsent(AbstractGeoLayer.Types.AREA_GRAPH, new GraphGeoLayer(this.geoLayerManager.getLayer(AbstractGeoLayer.Types.WEIGHTED_GRAPH)));
+        ctx.geoLayerManager.addLayerIfAbsent(AbstractGeoLayer.Types.WEIGHTED_GRAPH, new GraphGeoLayer(ctx.geoLayerManager.getLayer(AbstractGeoLayer.Types.ELEVATION)));
+        ctx.geoLayerManager.addLayerIfAbsent(AbstractGeoLayer.Types.PATHS, new PathGeoLayer(ctx.geoLayerManager.getLayer(AbstractGeoLayer.Types.WEIGHTED_GRAPH)));
+        ctx.geoLayerManager.addLayerIfAbsent(AbstractGeoLayer.Types.OUTPUT_TILE, new OutputTileGeoLayer(ctx.geoLayerManager.getLayer(AbstractGeoLayer.Types.PATHS)));
         //this.geoLayerManager.addLayerIfAbsent(GeoLayer.Types.RIVER_SPLINE, new GraphGeoLayer());
         //this.geoLayerManager.addLayerIfAbsent(GeoLayer.Types.RIVER_MASK, new GraphGeoLayer());
     	return ctx;

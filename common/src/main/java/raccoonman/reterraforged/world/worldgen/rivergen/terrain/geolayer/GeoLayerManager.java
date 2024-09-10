@@ -5,6 +5,8 @@ import raccoonman.reterraforged.world.worldgen.GeneratorContext;
 import raccoonman.reterraforged.world.worldgen.densityfunction.tile.Tile;
 import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.AbstractGeoLayer;
 import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.ElevationGeoLayer;
+import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.OutputTileGeoLayer;
+import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.PathGeoLayer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,8 +29,13 @@ public class GeoLayerManager {
         return contextLayers.get(type); // No cast needed
     }
 
-    public Tile getBaseTile(ChunkPos chunkPos) {
+    public Tile getTilePre(ChunkPos chunkPos) {
         ElevationGeoLayer elevationGeoLayer = (ElevationGeoLayer)getLayer(AbstractGeoLayer.Types.ELEVATION);
         return (Tile) elevationGeoLayer.getOrComputeChunk(chunkPos, this.generatorContext);
+    }
+
+    public Tile getTilePost(ChunkPos chunkPos) {
+        OutputTileGeoLayer outputTileGeoLayer = (OutputTileGeoLayer)getLayer(AbstractGeoLayer.Types.OUTPUT_TILE);
+        return (Tile) outputTileGeoLayer.getOrComputeChunk(chunkPos, this.generatorContext).getTile(chunkPos);
     }
 }

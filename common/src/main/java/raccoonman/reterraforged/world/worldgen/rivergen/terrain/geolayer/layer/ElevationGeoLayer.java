@@ -31,10 +31,11 @@ public class ElevationGeoLayer extends AbstractGeoLayer {
         // Populate heightmap from generatorContext
         //TODO: Add an utility method to Tile that returns the long[][]
         //  Or, simply use Tiles in the GeoLayer itself, which is probably better
-        if (tileCache != null) {
-            return tileCache.provideAtChunkIfPresent(chunkPos.x, chunkPos.z);
-        } else {
-            return tileCache.provide(tileCache.chunkToTile(chunkPos.x), tileCache.chunkToTile(chunkPos.z));
-        }
+        if (tileCache instanceof TileCache) {
+            Tile t = tileCache.provideAtChunkIfPresent(chunkPos.x, chunkPos.z);
+            if (t instanceof Tile) {return t;} else {
+                return tileCache.provide(tileCache.chunkToTile(chunkPos.x), tileCache.chunkToTile(chunkPos.z));
+            }
+        } else { return null;}
     }
 }

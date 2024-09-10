@@ -3,17 +3,18 @@ package raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.
 import net.minecraft.world.level.ChunkPos;
 import raccoonman.reterraforged.world.worldgen.GeneratorContext;
 import raccoonman.reterraforged.world.worldgen.rivergen.math.Int2D;
-import raccoonman.reterraforged.world.worldgen.rivergen.math.graph.WeightedGraph;
 import raccoonman.reterraforged.world.worldgen.rivergen.math.graph.GraphNode;
+import raccoonman.reterraforged.world.worldgen.rivergen.math.graph.WeightedGraph;
 import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.GraphGeoLayer;
+import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.PathGeoLayer;
 
 import java.util.List;
 
-public class GraphGeoChunk extends AbstractGeoChunk {
+public class PathGeoChunk extends AbstractGeoChunk {
     public WeightedGraph graph;
-    public GraphGeoChunk(ChunkPos chunkPos, GraphGeoLayer parentGraphGeoLayer, GeneratorContext context, List<ChunkPos> contextGeoChunks, WeightedGraph graph)
+    public PathGeoChunk(ChunkPos chunkPos, PathGeoLayer parentPathGeoLayer, GeneratorContext context, List<ChunkPos> contextGeoChunks, WeightedGraph graph)
     {
-        super(chunkPos, parentGraphGeoLayer, context, contextGeoChunks);
+        super(chunkPos, parentPathGeoLayer, context, contextGeoChunks);
         this.graph = graph;
 
         // Get neighbor graphs and do stitching
@@ -22,11 +23,17 @@ public class GraphGeoChunk extends AbstractGeoChunk {
 
     private void tryStitch() {
 
-        for (ChunkPos offset : contextGeoChunks) {
+        for (ChunkPos offset : super.contextGeoChunks) {
             // Calculate the neighbor's chunk position
-            ChunkPos neighborChunk = new ChunkPos(chunkPos.x + offset.x, chunkPos.z + offset.z);
-            GraphGeoChunk neighborGraphGeoChunk = (GraphGeoChunk) parentGeoLayer.getOrComputeChunk(neighborChunk, generatorContext);
-            stitchChunkEdges(this.graph, neighborGraphGeoChunk.graph, offset);
+            ChunkPos neighborChunk = new ChunkPos(super.chunkPos.x + offset.x, super.chunkPos.z + offset.z);
+
+            // Get the neighboring chunk from the parent layer
+            PathGeoChunk neighborGraphGeoChunk = (PathGeoChunk) super.parentGeoLayer.getOrComputeChunk(neighborChunk, super.generatorContext);
+
+            // If the neighboring chunk exists, proceed with stitching
+            if (neighborGraphGeoChunk != null) {
+                stitchChunkEdges(this.graph, neighborGraphGeoChunk.graph, offset);
+            }
         }
     }
 

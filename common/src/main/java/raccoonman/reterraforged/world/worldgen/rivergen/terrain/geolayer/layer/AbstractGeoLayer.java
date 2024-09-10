@@ -11,12 +11,13 @@ public abstract class AbstractGeoLayer {
     public enum Types {
         ELEVATION,
         WEIGHTED_GRAPH,
-        AREA_GRAPH,
+        PATHS,
         SPLINE_NET,
-        TERRAIN_MASK
+        TERRAIN_MASK,
+        OUTPUT_TILE
     }
 
-    private Map<ChunkPos, AbstractGeoChunk> layerChunks;
+    protected Map<ChunkPos, AbstractGeoChunk> layerChunks;
     protected AbstractGeoLayer dependencyLayer;
 
     // Constructor to initialize layerObject

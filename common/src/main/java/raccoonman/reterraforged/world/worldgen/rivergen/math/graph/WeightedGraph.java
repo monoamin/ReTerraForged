@@ -1,53 +1,56 @@
 package raccoonman.reterraforged.world.worldgen.rivergen.math.graph;
 import net.minecraft.world.level.ChunkPos;
-import org.apache.logging.log4j.core.appender.rolling.action.IfAll;
+import raccoonman.reterraforged.world.worldgen.densityfunction.tile.Tile;
 import raccoonman.reterraforged.world.worldgen.rivergen.math.Int2D;
 
 import java.util.*;
 
 public class WeightedGraph {
     private final Map<Int2D, GraphNode> nodes = new HashMap<>();
+    private Tile tile;
 
-    public WeightedGraph(long[][] heightMap, ChunkPos chunkPos) {
+    public WeightedGraph(ChunkPos chunkPos) {
+
+    }
+
+    private void tileToNodes(){
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
                 // Add current node to graph
-                addNode(new Int2D(x, z), heightMap[x][z]);
+                addNode(new Int2D(x, z), tile.getCellRaw(x,z).height);
             }
         }
-
+        // Calculate graph Edges
         calculateEdges();
+    }
+
+    public static WeightedGraph fromTile(Tile tile, ChunkPos chunkPos){
+        WeightedGraph g = new WeightedGraph(chunkPos);
+        g.tile = tile;
+        g.tileToNodes();
+        return g;
     }
 
     public WeightedGraph() {
 
     }
 
-    // Adds a node to the graph
     public void addNode(Int2D node, double weight) {
-        //adjacentList.computeIfAbsent(node, key -> new HashSet<>());
-        //nodeWeights.put(node, weight);
         nodes.put(node, new GraphNode(node, weight));
     }
 
-    // Adds a directed edge from one node to another with a specific weight
-    public void addDirectedEdge(GraphNode one, GraphNode two, double weight) {
-        //addNode(one);
-        //addNode(two);
-        //adjacentList.get(one).add(two);
-        //setDirectedEdgeWeight(one, two, weight);
+    public void addEdge(GraphNode one, GraphNode two, double weight) {
         nodes.get(one.getPosition()).addEdge(two, weight);
     }
 
-    // Sets the weight of a directed edge between two nodes
-    public void setDirectedEdgeWeight(Int2D one, Int2D two, double weight) {
+    public void setEdgeWeight(Int2D one, Int2D two, double weight) {
         for (GraphEdge edge : nodes.get(one).getEdges()) {
             if (edge.getTarget().getPosition() == two) edge.setWeight(weight);
         }
     }
 
     // Gets the weight of the edge between two nodes, returns null if the edge does not exist
-    public Double getDirectedEdgeWeight(Int2D one, Int2D two) {
+    public Double getEdgeWeight(Int2D one, Int2D two) {
         for (GraphEdge edge : nodes.get(one).getEdges()) {
             if (edge.getTarget().getPosition() == two) return edge.getWeight();
         }
@@ -64,7 +67,7 @@ public class WeightedGraph {
     }
 
     // Removes a directed edge from one node to another
-    public void removeDirectedEdge(Int2D one, GraphNode two) {
+    public void removeEdge(Int2D one, GraphNode two) {
         nodes.get(one).removeEdge(two);
     }
 
@@ -121,14 +124,22 @@ public class WeightedGraph {
                 // Get the lowest Moore neighbors and add them to the graph
                 for (GraphNode lowerNeighbor : GraphNode.getLowestNeighbors(sourceNode, neighbors)) {
                     int yDiff = Math.abs((int) sourceNode.getWeight() - (int) lowerNeighbor.getWeight());
-                    if (yDiff > 0) addDirectedEdge(sourceNode, lowerNeighbor, yDiff);
+                    if (yDiff > 0) addEdge(sourceNode, lowerNeighbor, yDiff);
                 }
             }
         }
     }
 
-    public WeightedGraph getSubGraph(Int2D elevationMax) {
+    public WeightedGraph getSubGraphFromHighest() {
         WeightedGraph prunedGraph = new WeightedGraph(); // Initialize pruned graph
+        int max = 0;
+        Int2D elevationMax = new Int2D(7,7); // Fallback to chunk center
+        for (GraphNode n: prunedGraph.getAllNodes()){
+            double w = n.getWeight();
+            if (w>max) max=(int)w;
+            elevationMax=n.getPosition();
+        }
+
         GraphNode startNode = this.nodes.get(elevationMax); // Retrieve starting node based on elevationMax
         Set<GraphNode> visitedNodes = new HashSet<>(); // Set of visited nodes to avoid cycles
 
@@ -163,7 +174,7 @@ public class WeightedGraph {
                     pq.add(new PathNode(targetNode, newCumulativeDescent));
 
                     // Add the edge to the pruned graph if it's part of the steepest descent path
-                    prunedGraph.addDirectedEdge(currentNode, targetNode, heightDifference);
+                    prunedGraph.addEdge(currentNode, targetNode, heightDifference);
                 }
             }
         }

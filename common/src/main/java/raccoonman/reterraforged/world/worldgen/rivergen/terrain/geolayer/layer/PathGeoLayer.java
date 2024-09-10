@@ -2,14 +2,12 @@ package raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer;
 
 import net.minecraft.world.level.ChunkPos;
 import raccoonman.reterraforged.world.worldgen.GeneratorContext;
-import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.chunkmap.ElevationGeoChunk;
-import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.chunkmap.AbstractGeoChunk;
-import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.chunkmap.GraphGeoChunk;
+import raccoonman.reterraforged.world.worldgen.rivergen.math.Int2D;
+import raccoonman.reterraforged.world.worldgen.rivergen.math.graph.WeightedGraph;
+import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.chunkmap.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PathGeoLayer extends AbstractGeoLayer {
 
@@ -18,40 +16,12 @@ public class PathGeoLayer extends AbstractGeoLayer {
     }
 
     @Override
-    public GraphGeoChunk getOrComputeChunk(ChunkPos chunkPos, GeneratorContext context) {
-        GraphGeoLayer graphGeoLayer = (GraphGeoLayer) super.dependencyLayer;
-        AbstractGeoChunk elevationMax = graphGeoLayer.getOrComputeChunk(chunkPos, context);
-
-        int radius = 1;
-        List<GraphGeoChunk> neighbors = new ArrayList<>();
-
-        for (int x = -radius; x <= radius; x++) {
-            for (int z = -radius; z <= radius; z++) {
-                if (x != 0 && z != 0) {
-                    neighbors.add(graphGeoLayer.getOrComputeChunk(new ChunkPos(chunkPos.x + x, chunkPos.z + z), context));
-                }
-            }
-        }
-
-        // Identify maxima
-        // Traverse and prune
-
-
-        return  null;
+    public GraphGeoChunk getOrComputeChunk(ChunkPos chunkPos, GeneratorContext generatorContext) {
+        GraphGeoLayer graphGeoLayer = (GraphGeoLayer) dependencyLayer;
+        WeightedGraph graphAtChunk = graphGeoLayer.getOrComputeChunk(chunkPos, generatorContext).graph;
+        WeightedGraph spanningSubgraph = graphAtChunk.getSubGraphFromHighest();
+        PathGeoChunk geoChunk = new PathGeoChunk(chunkPos, this, generatorContext, GeoChunkContext.single(chunkPos), spanningSubgraph);
+        return (GraphGeoChunk) layerChunks.put(chunkPos, geoChunk);
     }
-
-    /*
-    public GraphGeoChunk addChunk(ChunkPos chunkPos, GraphGeoChunk graphGeoChunk) {
-        return layerChunks.put(chunkPos, graphGeoChunk);
-    }
-
-    public void delChunk(ChunkPos chunkPos) {
-        layerChunks.remove(chunkPos);
-    }
-
-    public boolean exists(ChunkPos chunkPos) {
-        return layerChunks.containsKey(chunkPos);
-    }
-    */
 
 }

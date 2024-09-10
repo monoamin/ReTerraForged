@@ -19,14 +19,14 @@ public class GraphGeoLayer extends AbstractGeoLayer {
     }
 
     @Override
-    public GraphGeoChunk getOrComputeChunk(ChunkPos chunkPos, GeneratorContext context) {
-        ElevationGeoLayer elevationGeoLayer = (ElevationGeoLayer) super.dependencyLayer;
-        if ( super.exists(chunkPos) ) {
-            return (GraphGeoChunk) super.getOrComputeChunk(chunkPos, context);
+    public GraphGeoChunk getOrComputeChunk(ChunkPos chunkPos, GeneratorContext generatorContext) {
+        ElevationGeoLayer elevationGeoLayer = (ElevationGeoLayer) dependencyLayer;
+        if ( exists(chunkPos) ) {
+            return getOrComputeChunk(chunkPos, generatorContext);
         } else {
-            ElevationGeoChunk elevationGeoChunk = null; // (ElevationGeoChunk)elevationGeoLayer.getOrComputeChunk(chunkPos,context);
-            WeightedGraph graph = null; //new WeightedGraph(elevationGeoChunk.getData(), chunkPos);
-            return (GraphGeoChunk) super.addChunk(chunkPos, new GraphGeoChunk(chunkPos, this, context, GeoChunkContext.moore(chunkPos), graph));
+            WeightedGraph graph = WeightedGraph.fromTile(elevationGeoLayer.getOrComputeChunk(chunkPos, generatorContext), chunkPos);
+            return (GraphGeoChunk)
+                    addChunk(chunkPos, new GraphGeoChunk(chunkPos, this, generatorContext, GeoChunkContext.moore(chunkPos, 1), graph));
         }
     }
 }

@@ -2,6 +2,7 @@ package raccoonman.reterraforged.mixin;
 
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.levelgen.*;
+import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -25,33 +26,25 @@ import raccoonman.reterraforged.world.worldgen.rivergen.math.Int2D;
 
 @Mixin(NoiseChunk.class)
 class MixinNoiseChunk {
-	@Unique
 	private RandomState randomState;
-
-	@Unique
 	private int chunkX, chunkZ;
 
-	@Unique
 	@Nullable
 	private Tile.Chunk chunk;
 
-	@Unique
 	private CellSampler.Cache2d cache2d;
 
-	@Unique
 	@Shadow
     @Final
 	int firstNoiseX;
 
-	@Unique
 	@Shadow
     @Final
     int firstNoiseZ;
 
-	@Unique
 	@Shadow
     @Final
-    int cellCountXZ;
+    private int cellCountXZ;
 	
 	@Redirect(
 		at = @At(
@@ -69,7 +62,10 @@ class MixinNoiseChunk {
 		if((Object) randomState instanceof RTFRandomState rtfRandomState && cellCountXZ > 1 && (generatorContext = rtfRandomState.generatorContext()) != null) {
 			//OG//this.chunk = generatorContext.cache.provideAtChunk(this.chunkX, this.chunkZ).getChunkReader(this.chunkX, this.chunkZ);
 			//this.chunk = generatorContext.geoLayerManager.getTilePre(chunkPos).getChunkReader(this.chunkX, this.chunkZ);
+			double starttime = System.nanoTime();
 			this.chunk = generatorContext.geoLayerManager.getTilePost(chunkPos).getChunkReader(this.chunkX, this.chunkZ);
+			double endtime = System.nanoTime();
+			double duration = endtime-starttime;
 			//this.chunk = generatorContext.geoLayerManager.
 		}
 		this.cache2d = new CellSampler.Cache2d();

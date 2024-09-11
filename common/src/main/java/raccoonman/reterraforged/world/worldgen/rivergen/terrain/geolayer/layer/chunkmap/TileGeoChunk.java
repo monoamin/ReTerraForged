@@ -10,11 +10,13 @@ import java.util.List;
 import java.util.Map;
 
 public class TileGeoChunk extends AbstractGeoChunk {
-    public TileGeoChunk(Int2D chunkPos, AbstractGeoLayer parentGeoLayer, GeneratorContext generatorContext, GraphGeoChunk pathGeoChunk) {
+    private Tile tile;
+    public TileGeoChunk(Int2D chunkPos, AbstractGeoLayer parentGeoLayer, GeneratorContext generatorContext, Tile tile) {
         super(chunkPos, parentGeoLayer, generatorContext);
+        this.tile = tile;
     }
 
     public Tile getTile(Int2D chunkPos) {
-        return null;
+        return tile;
     }
 }

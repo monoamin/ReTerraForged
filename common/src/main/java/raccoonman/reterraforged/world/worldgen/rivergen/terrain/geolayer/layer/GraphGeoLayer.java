@@ -6,7 +6,6 @@ import raccoonman.reterraforged.world.worldgen.rivergen.math.Int2D;
 import raccoonman.reterraforged.world.worldgen.rivergen.math.graph.WeightedGraph;
 import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.chunkmap.AbstractGeoChunk;
 import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.chunkmap.ElevationGeoChunk;
-import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.chunkmap.GeoChunkContext;
 import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.chunkmap.GraphGeoChunk;
 
 import java.util.ArrayList;
@@ -26,8 +25,9 @@ public class GraphGeoLayer extends AbstractGeoLayer {
             return getOrComputeChunk(chunkPos, generatorContext);
         } else {
             WeightedGraph graph = WeightedGraph.fromTile(elevationGeoLayer.getOrComputeChunk(chunkPos, generatorContext), chunkPos);
-            return (GraphGeoChunk)
-                    addChunk(chunkPos, new GraphGeoChunk(chunkPos, this, generatorContext, layerChunks.getMooreNeighbors(chunkPos, 1), graph));
+            GraphGeoChunk g = new GraphGeoChunk(chunkPos, this, generatorContext, graph);
+            addChunk(chunkPos,g);
+            return g;
         }
     }
 }

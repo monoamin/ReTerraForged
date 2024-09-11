@@ -1,5 +1,7 @@
 package raccoonman.reterraforged.world.worldgen.rivergen.math.graph;
 import net.minecraft.world.level.ChunkPos;
+import raccoonman.reterraforged.RTFCommon;
+import raccoonman.reterraforged.data.worldgen.preset.settings.Preset;
 import raccoonman.reterraforged.world.worldgen.densityfunction.tile.Tile;
 import raccoonman.reterraforged.world.worldgen.rivergen.math.Int2D;
 
@@ -8,16 +10,27 @@ import java.util.*;
 public class WeightedGraph {
     private final Map<Int2D, GraphNode> nodes = new HashMap<>();
     private Tile tile;
+    private Int2D positionMax = new Int2D(0,0); // Fallback to chunk center
 
     public WeightedGraph(Int2D chunkPos) {
 
     }
 
+    public Int2D getPositionMax(){
+        return positionMax;
+    }
+
     private void tileToNodes(){
+        double elevationMax = 0;
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
+                double tilevalue = tile.getCellRaw(x,z).height*320;
                 // Add current node to graph
-                addNode(new Int2D(x, z), tile.getCellRaw(x,z).height);
+                if (tilevalue > elevationMax) {
+                    elevationMax = tilevalue;
+                    positionMax = new Int2D(x,z);
+                }
+                addNode(new Int2D(x, z), tilevalue);
             }
         }
         // Calculate graph Edges
@@ -119,76 +132,68 @@ public class WeightedGraph {
                     }
                 }
 
-                // Get the lowest Moore neighbors and add them to the graph
-                for (GraphNode lowerNeighbor : GraphNode.getLowestNeighbors(sourceNode, neighbors)) {
-                    int yDiff = Math.abs((int) sourceNode.getWeight() - (int) lowerNeighbor.getWeight());
-                    if (yDiff > 0) addEdge(sourceNode, lowerNeighbor, yDiff);
+                for (GraphNode neighbor : neighbors) {
+                    double descent = sourceNode.getWeight() - neighbor.getWeight();
+                    if (descent > 0.00d) { // For any descent greater than zero
+                        addEdge(sourceNode, neighbor, descent);
+                    }
                 }
+
             }
         }
     }
 
     public WeightedGraph getSubGraphFromHighest() {
-        WeightedGraph prunedGraph = new WeightedGraph(); // Initialize pruned graph
-        int max = 0;
-        Int2D elevationMax = new Int2D(7,7); // Fallback to chunk center
-        for (GraphNode n: prunedGraph.getAllNodes()){
-            double w = n.getWeight();
-            if (w>max) max=(int)w;
-            elevationMax=n.getPosition();
-        }
+        GraphNode startNode = this.nodes.get(positionMax); // Retrieve starting node based on elevationMax
 
-        GraphNode startNode = this.nodes.get(elevationMax); // Retrieve starting node based on elevationMax
-        Set<GraphNode> visitedNodes = new HashSet<>(); // Set of visited nodes to avoid cycles
+        WeightedGraph steepestSubgraph = new WeightedGraph();  // This will store the result graph
+        Set<GraphNode> visited = new HashSet<>();  // Set of visited nodes to avoid revisiting
+        Queue<PathNode> queue = new LinkedList<>();  // Queue for BFS, stores nodes and cumulative descent
 
-        // Priority queue for selecting paths based on steepest cumulative descent
-        PriorityQueue<PathNode> pq = new PriorityQueue<>((a, b) -> Long.compare(b.cumulativeDescent, a.cumulativeDescent));
-        // Start from the maximum elevation node
-        pq.add(new PathNode(startNode, 0)); // Start with zero cumulative descent
+        // Initialize the queue with the starting node and a descent of 0
+        queue.add(new PathNode(startNode, 0));
 
-        while (!pq.isEmpty()) {
-            PathNode pathNode = pq.poll();
-            GraphNode currentNode = pathNode.node;
+        while (!queue.isEmpty()) {
+            PathNode current = queue.poll();
+            GraphNode currentNode = current.node;
 
-            // Avoid reprocessing nodes
-            if (visitedNodes.contains(currentNode)) continue;
-            visitedNodes.add(currentNode);
+            // If we've already visited this node, skip it
+            if (visited.contains(currentNode)) {
+                continue;
+            }
+            visited.add(currentNode);
 
-            // Add current node to pruned graph
-            prunedGraph.addNode(currentNode.getPosition(),1);
+            // Add the current node to the result graph
+            steepestSubgraph.addNode(currentNode.getPosition(), currentNode.getWeight());
 
-            Set<GraphEdge> edges = currentNode.getEdges();
+            // Process each edge of the current node
+            for (GraphEdge edge : currentNode.getEdges()) {
+                GraphNode neighbor = edge.getTarget();
+                double edgeWeight = edge.getWeight();
+                double newCumulativeDescent = current.cumulativeDescent + edgeWeight;
 
-            for (GraphEdge edge : edges) {
-                GraphNode targetNode = edge.getTarget();
+                // We're only interested in descending edges (positive weight)
+                if (edgeWeight > 0 && !visited.contains(neighbor)) {
+                    // Add the edge to the result graph
+                    steepestSubgraph.addEdge(currentNode, neighbor, edgeWeight);
 
-                long heightDifference = (long) (currentNode.getWeight() - targetNode.getWeight());
-
-                // We're only interested in descending paths
-                if (heightDifference > 0) {
-                    long newCumulativeDescent = pathNode.cumulativeDescent + heightDifference;
-
-                    // Add this path with updated cumulative descent
-                    pq.add(new PathNode(targetNode, newCumulativeDescent));
-
-                    // Add the edge to the pruned graph if it's part of the steepest descent path
-                    prunedGraph.addEdge(currentNode, targetNode, heightDifference);
+                    // Add the neighbor to the queue with updated cumulative descent
+                    queue.add(new PathNode(neighbor, newCumulativeDescent));
                 }
             }
         }
 
-        return prunedGraph;
+        return steepestSubgraph;  // Return the steepest subgraph
     }
 
-    // Helper class to store path information
-    class PathNode {
+    // Helper class to store the current node and cumulative descent
+    private class PathNode {
         GraphNode node;
-        long cumulativeDescent;
+        double cumulativeDescent;
 
-        public PathNode(GraphNode node, long cumulativeDescent) {
+        public PathNode(GraphNode node, double cumulativeDescent) {
             this.node = node;
             this.cumulativeDescent = cumulativeDescent;
         }
     }
-
 }

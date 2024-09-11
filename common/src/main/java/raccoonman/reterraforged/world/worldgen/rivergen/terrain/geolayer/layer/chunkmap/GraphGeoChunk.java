@@ -22,11 +22,11 @@ public class GraphGeoChunk extends AbstractGeoChunk {
     }
 
     private void tryStitch() {
-        for (Map.Entry<Int2D, AbstractGeoChunk> neighborGraphGeoChunk : ((GraphGeoLayer)parentGeoLayer).layerChunks.getMooreNeighbors(chunkPos,1)) {
+        for (Map.Entry<Int2D, AbstractGeoChunk> neighborGraphGeoChunk : parentGeoLayer.layerChunks.getMooreNeighbors(chunkPos,1)) {
             // Calculate the neighbor's chunk position
             Int2D offset = neighborGraphGeoChunk.getKey().sub(chunkPos);
             // If the neighboring chunk exists, proceed with stitching
-            stitchChunkEdges(this.graph, ((GraphGeoChunk) neighborGraphGeoChunk).graph, offset);
+            stitchChunkEdges(this.graph, ((GraphGeoChunk) neighborGraphGeoChunk.getValue()).graph, offset);
         }
     }
 
@@ -69,7 +69,7 @@ public class GraphGeoChunk extends AbstractGeoChunk {
             // Calculate the edge weight and stitch nodes
             if (sourceNode != null && neighborNode != null) {
                 edgeWeight = sourceNode.getWeight() - neighborNode.getWeight();
-                if (edgeWeight < 0) {
+                if (edgeWeight <= 0) {
                     currentGraph.addEdge(sourceNode, neighborNode, edgeWeight);
                 } else if (edgeWeight > 0) {
                     neighborGraph.addEdge(neighborNode, sourceNode, edgeWeight);

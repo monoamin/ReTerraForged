@@ -16,12 +16,12 @@ public class PathGeoLayer extends AbstractGeoLayer {
     }
 
     @Override
-    public GraphGeoChunk getOrComputeChunk(ChunkPos chunkPos, GeneratorContext generatorContext) {
+    public GraphGeoChunk getOrComputeChunk(Int2D chunkPos, GeneratorContext generatorContext) {
         GraphGeoLayer graphGeoLayer = (GraphGeoLayer) dependencyLayer;
         WeightedGraph graphAtChunk = graphGeoLayer.getOrComputeChunk(chunkPos, generatorContext).graph;
-        WeightedGraph spanningSubgraph = graphAtChunk.getSubGraphFromHighest();
-        PathGeoChunk geoChunk = new PathGeoChunk(chunkPos, this, generatorContext, GeoChunkContext.single(chunkPos), spanningSubgraph);
-        return (GraphGeoChunk) layerChunks.put(chunkPos, geoChunk);
+        WeightedGraph spanningSubgraph =  graphAtChunk.getSubGraphFromHighest();
+        PathGeoChunk geoChunk = new PathGeoChunk(chunkPos, this, generatorContext, spanningSubgraph);
+        return (GraphGeoChunk) addChunk(chunkPos, geoChunk);
     }
 
 }

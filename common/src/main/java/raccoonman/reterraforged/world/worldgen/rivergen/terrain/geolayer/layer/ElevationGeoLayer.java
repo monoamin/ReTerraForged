@@ -7,6 +7,7 @@ import raccoonman.reterraforged.world.worldgen.cell.Cell;
 import raccoonman.reterraforged.world.worldgen.densityfunction.tile.Tile;
 import raccoonman.reterraforged.world.worldgen.densityfunction.tile.TileCache;
 import raccoonman.reterraforged.world.worldgen.densityfunction.tile.generation.TileGenerator;
+import raccoonman.reterraforged.world.worldgen.rivergen.math.Int2D;
 import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.chunkmap.ElevationGeoChunk;
 import raccoonman.reterraforged.world.worldgen.util.PosUtil;
 
@@ -23,18 +24,18 @@ public class ElevationGeoLayer extends AbstractGeoLayer {
         super(null); // Initialize super with null because we don't have any dependencies on GeoLayers
         this.tileGenerator = tileGenerator;
         this.tileCache = tileCache;
-        //layerChunks = new HashMap<ChunkPos, ElevationGeoChunk>();
+        //layerChunks = new ConcurrentGridMap<Int2D, ElevationGeoChunk>();
     }
 
     @Override
-    public Tile getOrComputeChunk(ChunkPos chunkPos, GeneratorContext context) {
+    public Tile getOrComputeChunk(Int2D chunkPos, GeneratorContext context) {
         // Populate heightmap from generatorContext
         //TODO: Add an utility method to Tile that returns the long[][]
         //  Or, simply use Tiles in the GeoLayer itself, which is probably better
         if (tileCache instanceof TileCache) {
-            Tile t = tileCache.provideAtChunkIfPresent(chunkPos.x, chunkPos.z);
+            Tile t = tileCache.provideAtChunkIfPresent(chunkPos.x(), chunkPos.z());
             if (t instanceof Tile) {return t;} else {
-                return tileCache.provide(tileCache.chunkToTile(chunkPos.x), tileCache.chunkToTile(chunkPos.z));
+                return tileCache.provide(tileCache.chunkToTile(chunkPos.x()), tileCache.chunkToTile(chunkPos.x()));
             }
         } else { return null;}
     }

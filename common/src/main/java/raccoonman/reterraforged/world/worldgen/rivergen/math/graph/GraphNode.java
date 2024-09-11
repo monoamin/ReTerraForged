@@ -47,13 +47,14 @@ public class GraphNode {
         List<GraphNode> lowestNeighbors = new ArrayList<>();
 
         // Find the lowest height value among neighbors
-        for (int i = 0; i < 4; i++) {
-            if (neighborHood.get(i).getWeight() < lowest) {
-                lowest = (int)Math.round(neighborHood.get(i).getWeight());
+        //for (int i = 0; i < neighborHood.size(); i++) {
+        for (GraphNode n: neighborHood) {
+            if (n.getWeight() < lowest) {
+                lowest = (int)Math.round(n.getWeight());
                 lowestNeighbors.clear();  // Clear current list when a new lowest is found
-                lowestNeighbors.add(neighborHood.get(i));
-            } else if (neighborHood.get(i).getWeight() == lowest) {
-                lowestNeighbors.add(neighborHood.get(i));
+                lowestNeighbors.add(n);
+            } else if (n.getWeight() == lowest) {
+                lowestNeighbors.add(n);
             }
         }
         return lowestNeighbors;

@@ -8,12 +8,13 @@ import raccoonman.reterraforged.world.worldgen.rivergen.math.graph.GraphNode;
 import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.GraphGeoLayer;
 
 import java.util.List;
+import java.util.Map;
 
 public class GraphGeoChunk extends AbstractGeoChunk {
     public WeightedGraph graph;
-    public GraphGeoChunk(ChunkPos chunkPos, GraphGeoLayer parentGraphGeoLayer, GeneratorContext context, List<ChunkPos> contextGeoChunks, WeightedGraph graph)
+    public GraphGeoChunk(Int2D chunkPos, GraphGeoLayer parentGraphGeoLayer, GeneratorContext context, WeightedGraph graph)
     {
-        super(chunkPos, parentGraphGeoLayer, context, contextGeoChunks);
+        super(chunkPos, parentGraphGeoLayer, context);
         this.graph = graph;
 
         // Get neighbor graphs and do stitching
@@ -21,47 +22,46 @@ public class GraphGeoChunk extends AbstractGeoChunk {
     }
 
     private void tryStitch() {
-
-        for (ChunkPos offset : contextGeoChunks) {
+        for (Map.Entry<Int2D, AbstractGeoChunk> neighborGraphGeoChunk : ((GraphGeoLayer)parentGeoLayer).layerChunks.getMooreNeighbors(chunkPos,1)) {
             // Calculate the neighbor's chunk position
-            ChunkPos neighborChunk = new ChunkPos(chunkPos.x + offset.x, chunkPos.z + offset.z);
-            GraphGeoChunk neighborGraphGeoChunk = (GraphGeoChunk) parentGeoLayer.getOrComputeChunk(neighborChunk, generatorContext);
-            stitchChunkEdges(this.graph, neighborGraphGeoChunk.graph, offset);
+            Int2D offset = neighborGraphGeoChunk.getKey().sub(chunkPos);
+            // If the neighboring chunk exists, proceed with stitching
+            stitchChunkEdges(this.graph, ((GraphGeoChunk) neighborGraphGeoChunk).graph, offset);
         }
     }
 
-    private void stitchChunkEdges(WeightedGraph currentGraph, WeightedGraph neighborGraph, ChunkPos offset) {
+    private void stitchChunkEdges(WeightedGraph currentGraph, WeightedGraph neighborGraph, Int2D offset) {
         for (int i = 0; i < 16; i++) { // Assuming chunks are 16x16
             GraphNode sourceNode = null;
             GraphNode neighborNode = null;
             double edgeWeight;
 
-            // Handle the direct neighbors first (right, left, top, bottom)
-            if (offset.x == 1 && offset.z == 0) { // Right
+            // Connect edge neighbors
+            if (offset.x() == 1 && offset.z() == 0) { // Right
                 sourceNode = currentGraph.getNode(new Int2D(15, i));
                 neighborNode = neighborGraph.getNode(new Int2D(0, i));
-            } else if (offset.x == -1 && offset.z == 0) { // Left
+            } else if (offset.x() == -1 && offset.z() == 0) { // Left
                 sourceNode = currentGraph.getNode(new Int2D(0, i));
                 neighborNode = neighborGraph.getNode(new Int2D(15, i));
-            } else if (offset.x == 0 && offset.z == 1) { // Top
+            } else if (offset.x() == 0 && offset.z() == 1) { // Top
                 sourceNode = currentGraph.getNode(new Int2D(i, 15));
                 neighborNode = neighborGraph.getNode(new Int2D(i, 0));
-            } else if (offset.x == 0 && offset.z == -1) { // Bottom
+            } else if (offset.x() == 0 && offset.z() == -1) { // Bottom
                 sourceNode = currentGraph.getNode(new Int2D(i, 0));
                 neighborNode = neighborGraph.getNode(new Int2D(i, 15));
             }
 
-            // Handle the corner cases (diagonal neighbors)
-            else if (offset.x == 1 && offset.z == 1) { // Top-right diagonal
+            // Connect corner neighbors
+            else if (offset.x() == 1 && offset.z() == 1) { // Top-right diagonal
                 sourceNode = currentGraph.getNode(new Int2D(15, 15)); // Top-right corner of current chunk
                 neighborNode = neighborGraph.getNode(new Int2D(0, 0)); // Bottom-left corner of neighbor chunk
-            } else if (offset.x == -1 && offset.z == 1) { // Top-left diagonal
+            } else if (offset.x() == -1 && offset.z() == 1) { // Top-left diagonal
                 sourceNode = currentGraph.getNode(new Int2D(0, 15)); // Top-left corner of current chunk
                 neighborNode = neighborGraph.getNode(new Int2D(15, 0)); // Bottom-right corner of neighbor chunk
-            } else if (offset.x == 1 && offset.z == -1) { // Bottom-right diagonal
+            } else if (offset.x() == 1 && offset.z() == -1) { // Bottom-right diagonal
                 sourceNode = currentGraph.getNode(new Int2D(15, 0)); // Bottom-right corner of current chunk
                 neighborNode = neighborGraph.getNode(new Int2D(0, 15)); // Top-left corner of neighbor chunk
-            } else if (offset.x == -1 && offset.z == -1) { // Bottom-left diagonal
+            } else if (offset.x() == -1 && offset.z() == -1) { // Bottom-left diagonal
                 sourceNode = currentGraph.getNode(new Int2D(0, 0)); // Bottom-left corner of current chunk
                 neighborNode = neighborGraph.getNode(new Int2D(15, 15)); // Top-right corner of neighbor chunk
             }

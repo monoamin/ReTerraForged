@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
@@ -20,23 +21,37 @@ import raccoonman.reterraforged.world.worldgen.RTFRandomState;
 import raccoonman.reterraforged.world.worldgen.densityfunction.CellSampler;
 import raccoonman.reterraforged.world.worldgen.densityfunction.ConditionalFlatCache;
 import raccoonman.reterraforged.world.worldgen.densityfunction.tile.Tile;
+import raccoonman.reterraforged.world.worldgen.rivergen.math.Int2D;
 
 @Mixin(NoiseChunk.class)
 class MixinNoiseChunk {
+	@Unique
 	private RandomState randomState;
+
+	@Unique
 	private int chunkX, chunkZ;
+
+	@Unique
 	@Nullable
 	private Tile.Chunk chunk;
+
+	@Unique
 	private CellSampler.Cache2d cache2d;
+
+	@Unique
 	@Shadow
     @Final
 	int firstNoiseX;
+
+	@Unique
 	@Shadow
     @Final
     int firstNoiseZ;
+
+	@Unique
 	@Shadow
     @Final
-	private int cellCountXZ;
+    int cellCountXZ;
 	
 	@Redirect(
 		at = @At(
@@ -49,7 +64,7 @@ class MixinNoiseChunk {
 		this.randomState = randomState1;
 		this.chunkX = SectionPos.blockToSectionCoord(minBlockX);
 		this.chunkZ = SectionPos.blockToSectionCoord(minBlockZ);
-		ChunkPos chunkPos = new ChunkPos(this.chunkX, this.chunkZ);
+		Int2D chunkPos = new Int2D(this.chunkX, this.chunkZ);
 		GeneratorContext generatorContext;
 		if((Object) randomState instanceof RTFRandomState rtfRandomState && cellCountXZ > 1 && (generatorContext = rtfRandomState.generatorContext()) != null) {
 			//OG//this.chunk = generatorContext.cache.provideAtChunk(this.chunkX, this.chunkZ).getChunkReader(this.chunkX, this.chunkZ);

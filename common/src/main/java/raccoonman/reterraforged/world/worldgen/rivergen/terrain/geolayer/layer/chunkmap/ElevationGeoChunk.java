@@ -11,14 +11,14 @@ import java.util.List;
 
 public class ElevationGeoChunk extends AbstractGeoChunk {
     private TileCache tileCache;
-    public ElevationGeoChunk(ChunkPos chunkPos, ElevationGeoLayer parentGeoLayer, GeneratorContext generatorContext, List<ChunkPos> contextGeoChunks)
+    public ElevationGeoChunk(Int2D chunkPos, ElevationGeoLayer parentGeoLayer, GeneratorContext generatorContext)
     {
-        super(chunkPos,parentGeoLayer,generatorContext,contextGeoChunks);
+        super(chunkPos,parentGeoLayer,generatorContext);
         this.tileCache = generatorContext.cache;
     }
 
     public Tile getTileChunk(){
-        return tileCache.provide(chunkPos.x,chunkPos.z);
+        return tileCache.provide(chunkPos.x(),chunkPos.z());
     }
 
     /*

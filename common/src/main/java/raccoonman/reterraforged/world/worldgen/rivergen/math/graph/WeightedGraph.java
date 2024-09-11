@@ -9,7 +9,7 @@ public class WeightedGraph {
     private final Map<Int2D, GraphNode> nodes = new HashMap<>();
     private Tile tile;
 
-    public WeightedGraph(ChunkPos chunkPos) {
+    public WeightedGraph(Int2D chunkPos) {
 
     }
 
@@ -24,7 +24,7 @@ public class WeightedGraph {
         calculateEdges();
     }
 
-    public static WeightedGraph fromTile(Tile tile, ChunkPos chunkPos){
+    public static WeightedGraph fromTile(Tile tile, Int2D chunkPos){
         WeightedGraph g = new WeightedGraph(chunkPos);
         g.tile = tile;
         g.tileToNodes();
@@ -115,8 +115,6 @@ public class WeightedGraph {
 
                         if (neighborX >= 0 && neighborX < 16 && neighborZ >= 0 && neighborZ < 16) {
                             neighbors.add(nodes.get(new Int2D(neighborX, neighborZ)));
-                        } else {
-                            neighbors.add(sourceNode); // Out-of-bounds neighbors default to sourceNode
                         }
                     }
                 }

@@ -2,6 +2,7 @@ package raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer;
 
 import net.minecraft.world.level.ChunkPos;
 import raccoonman.reterraforged.world.worldgen.GeneratorContext;
+import raccoonman.reterraforged.world.worldgen.rivergen.math.Int2D;
 import raccoonman.reterraforged.world.worldgen.rivergen.math.graph.WeightedGraph;
 import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.chunkmap.AbstractGeoChunk;
 import raccoonman.reterraforged.world.worldgen.rivergen.terrain.geolayer.layer.chunkmap.ElevationGeoChunk;
@@ -19,14 +20,14 @@ public class GraphGeoLayer extends AbstractGeoLayer {
     }
 
     @Override
-    public GraphGeoChunk getOrComputeChunk(ChunkPos chunkPos, GeneratorContext generatorContext) {
+    public GraphGeoChunk getOrComputeChunk(Int2D chunkPos, GeneratorContext generatorContext) {
         ElevationGeoLayer elevationGeoLayer = (ElevationGeoLayer) dependencyLayer;
         if ( exists(chunkPos) ) {
             return getOrComputeChunk(chunkPos, generatorContext);
         } else {
             WeightedGraph graph = WeightedGraph.fromTile(elevationGeoLayer.getOrComputeChunk(chunkPos, generatorContext), chunkPos);
             return (GraphGeoChunk)
-                    addChunk(chunkPos, new GraphGeoChunk(chunkPos, this, generatorContext, GeoChunkContext.moore(chunkPos, 1), graph));
+                    addChunk(chunkPos, new GraphGeoChunk(chunkPos, this, generatorContext, layerChunks.getMooreNeighbors(chunkPos, 1), graph));
         }
     }
 }
